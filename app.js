@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
@@ -12,12 +13,15 @@ const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 
 
+
+
 // const Campground = require('./models/campground');
 // const Review = require('./models/review');
 
 const userRoutes = require('./routes/users')
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+const { required } = require('joi');
 
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -44,6 +48,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const sessionConfig = {
     secret: 'thisshouldbeabettersecret!',
     resave: false,
@@ -68,6 +74,8 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
+    console.log(req.session)
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
